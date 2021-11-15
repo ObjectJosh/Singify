@@ -16,8 +16,8 @@
   
 </p>
 <h5 align="center">
+  <a href="#about">About</a> •
   <a href="#tools-and-dependencies">Tools and Dependencies</a> •
-  <a href="#our-team">Our Team</a> •
   <a href="#getting-started">Getting Started</a>
 </h5>
 
@@ -34,10 +34,21 @@
 
 ---
 
+<br />
+
+# About
+
+### How to Play
+A two-player game for you and your friends! After telling Singify which playlist you would like to play from, it will choose a random song and start playing a random part of the song for a few seconds, then stop it. Once the song stops, Singify uses visual artificial intelligence to detect who raised their hand first, and allow them to finish the lyrics. If the player gets it wrong, it's the next player's turn to give it a try. Once the point is given, Singify plays the next song. See who is the lyrical genius!
 
 <br />
 
-## Tools and Dependencies
+### Description
+We used machine learning to detect human poses for raising hands, which we trained using our own recorded pose data. A pose uses a body's position in a live camera feed to set skeletal landmark points, which we used to recognize if your hand is up or not. We used speech recognition to take user voice input and parse the speech through pattern matching, and detect matches with the corresponding song lyrics.
+
+<br />
+
+### Tools and Dependencies
 - Spotify API
 - YouTube Search API
 - YouTube Transcript API
@@ -47,7 +58,7 @@
 
 <br />
 
-## Our Team
+### Our Team
 | <a href="https://github.com/ObjectJosh" target="_blank"><img src="https://avatars.githubusercontent.com/u/42549561?v=4" width="125px"/></a> | <a href="https://github.com/chonein" target="_blank"><img src="https://avatars.githubusercontent.com/u/61818445?v=4" width="125px"/></a> | <a href="https://github.com/Westluu" target="_blank"><img src="https://avatars.githubusercontent.com/u/76977316?v=4" width="125px"/></a> | <a href="https://github.com/wiszeto" target="_blank"><img src="https://avatars.githubusercontent.com/u/85478086?v=4" width="125px"/></a> |
 |     :---:      |       :---:      |      :---:      |     :---:     |
 | **Josh Wong** <br /> *Developer* | **Christian Honein** <br /> *Developer* |  **Wesley Luu** <br /> *Developer* | **Wilson Szeto** <br /> *Developer* |
