@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">    
+
+<head>
+    <meta charset="utf-8">
     <title>Hand Raise Checker</title>
     <link rel="stylesheet" href="styles.css">
-  </head>
-  <body onload="init()">
+</head>
+
+<body onload="init()">
     <div id="header">
         <text>Right-Side, Check if hand is raised</text>
         <!-- <div>
@@ -36,20 +38,20 @@
             // Note: the pose library adds a tmPose object to your window (window.tmPose)
             model = await tmPose.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
-    
+
             // Convenience function to setup a webcam
             const size = 600;
             const flip = false; // whether to flip the webcam
             webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
             await webcam.setup(); // request access to the webcam
             await webcam.play();
-            
+
             window.requestAnimationFrame(loop);
-            
-    
+
+
             // append/get elements to the DOM
             const canvas = document.getElementById("right-canvas");
-            canvas.width = size/2; canvas.height = size;
+            canvas.width = size / 2; canvas.height = size;
             ctx = canvas.getContext("2d")
             // ctx.drawImage(webcam.canvas, 150, 300, 300, 600);
             labelContainer = document.getElementById("label-container");
@@ -58,13 +60,33 @@
             }
         }
 
-    
+
         async function loop(timestamp) {
             webcam.update(); // update the webcam frame
             await predict();
             window.requestAnimationFrame(loop);
-            }
-        
+        }
+
+
+        // async function predict() {
+        //     // Prediction #1: run input through posenet
+        //     // estimatePose can take in an image, video or canvas html element
+        //     const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+        //     // Prediction 2: run input through teachable machine classification model
+        //     const prediction = await model.predict(posenetOutput);
+
+        //     for (let i = 0; i < maxPredictions; i++) {
+        //         const classPrediction =
+        //             prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+        //         labelContainer.childNodes[i].innerHTML = classPrediction;
+        //         console.log("right: " + labelContainer.childNodes[i].innerHTML)
+        //     }
+
+        //     // finally draw the poses
+        //     drawPose(pose);
+        // }
+        predicts = {};
+        loop_count = 0;
 
         async function predict() {
             // Prediction #1: run input through posenet
@@ -72,18 +94,43 @@
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
             // Prediction 2: run input through teachable machine classification model
             const prediction = await model.predict(posenetOutput);
-    
+
             for (let i = 0; i < maxPredictions; i++) {
                 const classPrediction =
                     prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 labelContainer.childNodes[i].innerHTML = classPrediction;
-                console.log("right: " + labelContainer.childNodes[i].innerHTML)
+                predicts[prediction[i].className] = prediction[i].probability.toFixed(2);
+                console.log(predicts)
+                // localStorage.setItem('test', JSON.stringify(predicts));
+                // var fs = require('fs');
+                // fs.writeFile("test.json", JSON.stringify(predicts));
+                // console.log("right: " + labelContainer.childNodes[i].innerHTML)
+
+                // finally draw the poses
+                drawPose(pose);
             }
+            if (loop_count%500 == 0) {
+                const textToBLOB = new Blob([JSON.stringify(predicts)], { type: 'text/plain' });
+                const sFileName = 'right.txt';       // The file to save the data.
     
-            // finally draw the poses
-            drawPose(pose);
+                let newLink = document.createElement("a");
+                newLink.download = sFileName;
+    
+                if (window.webkitURL != null) {
+                    newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+                }
+                else {
+                    newLink.href = window.URL.createObjectURL(textToBLOB);
+                    newLink.style.display = "none";
+                    document.body.appendChild(newLink);
+                }
+    
+                newLink.click(); 
+            }
+            loop_count++;
+
         }
-    
+
         function drawPose(pose) {
             if (webcam.canvas) {
                 ctx.drawImage(webcam.canvas, 0, 0);
@@ -96,5 +143,6 @@
             }
         }
     </script>
-  </body>
+</body>
+
 </html>

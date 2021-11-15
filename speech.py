@@ -8,13 +8,13 @@ This program requires stdbuf.
 from subprocess import Popen, PIPE
 import time
 import signal
-from typing import Optional
-CMD = "../transcribe/transcribe/./main"
+# from typing import Optional
+CMD = "transcribe/transcribe/./main"
 PROCESS_RUNNING = False
 
 
 class Speech:
-    def __init__(self, stop_if_silent_time: float = 3, gstdbuf: bool = True)\
+    def __init__(self, stop_if_silent_time: int = 3, gstdbuf: bool = True)\
             -> None:
         """ on macos if installed using brew, stdbuf will be gstdbuf.
         If you have stdbuf, set gstdbuf to false.
@@ -22,8 +22,8 @@ class Speech:
         self.stop_silent_t = stop_if_silent_time
 
     def startSpeechRecognition(self, detection_time: float,
-                               stop_if_silent_time: float = None)\
-            -> Optional[str]:
+                               stop_if_silent_time: int = None)\
+            -> str:
         global PROCESS_RUNNING
         # runs compiled swift code using gstdbuf with argument -ol
         # this is to disable output buffers
@@ -32,16 +32,18 @@ class Speech:
             stop_if_silent_time = self.stop_silent_t
         process = Popen(["gstdbuf", "-oL", CMD], stdout=PIPE)
         timerStart = time.time()
-        detected_phrase = ''
+        detected_phrase = bytes()
 
-        line = ''
+        line = bytes()
         timeout_time = 2 * stop_if_silent_time
-        while time.time() - timerStart < detection_time and process.poll() is None:
+        while time.time() - timerStart < detection_time and process.poll()\
+                is None:
             PROCESS_RUNNING = True
             signal.alarm(timeout_time)
             # This blocks until it receives a newline.
             try:
-                line = process.stdout.readline()
+                if (process.stdout is not None):
+                    line = process.stdout.readline()
             except TimeoutOfFunction:
                 PROCESS_RUNNING = False
                 process.terminate()
@@ -50,7 +52,8 @@ class Speech:
                 timeout_time = stop_if_silent_time
                 print(line)
                 detected_phrase = line
-            else: print("????")
+            else:
+                print("????")
             # print(line)
             # last_detected_t = time.time()
         print("out_of_loop")
@@ -69,13 +72,13 @@ class TimeoutOfFunction(Exception):
     pass
 
 
-def handler(signum, frame):
+def handler(signum, frame):  # type: ignore
     print("wow it worked")
     if PROCESS_RUNNING is True:
         raise TimeoutOfFunction()
 
 
-signal.signal(signal.SIGALRM, handler)
+signal.signal(signal.SIGALRM, handler)  # type: ignore
 
 
 if __name__ == '__main__':

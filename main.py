@@ -5,6 +5,10 @@ from lyrics import swag_lyrics
 import transcript
 import time
 from fuzzywuzzy import fuzz
+import subprocess as sp
+import speech
+
+speechRecognizer = speech.Speech(2)
 
 #|##########################################################################|#
 #|                                  SETUP                                   |#
@@ -26,6 +30,8 @@ FRAME_SHIFT = 0 # (seconds) can be positive or negative
 TIME_TOLERANCE_INCREMENT = 5 # (seconds)
 MAXIMUM_TOLERANCE = 20 # (seconds)
 
+def say(text: str) -> None:
+    sp.call(['say', text])
 
 def setup():
     if os.path.exists("store/store.txt"):
@@ -44,6 +50,7 @@ def run(spotify):
     playlist_found = False
     while not playlist_found:
         playlist_found, playlist = ask_for_playlist(spotify)
+    say(f"Playing your {playlist['name']} playlist...")
     print(f"Playing your {playlist['name']} playlist...")
     # Valid playlist, now we get the tracks
     tracks = spotify.get_tracks(playlist["tracks"])
@@ -57,9 +64,10 @@ def run(spotify):
     # print(lyrics)
     # Seek to a random time on the song
     random_time = spotify.get_random_time(random_track)
+    ranom_time = 90000
     success = spotify.seek(random_time, random_track)
     while not success:
-        random_time = spotify.get_random_time(random_track)
+        # random_time = spotify.get_random_time(random_track)
         success = spotify.seek(random_time, random_track)
         if not success:
             print("Trying again...")
@@ -71,25 +79,32 @@ def run(spotify):
         # for each in transcript:
         #     print(each)
     else:
+        say("Sorry, I wasn't able to get lyrics to match to that song")
         print("Error: Unable to get lyrics")
-    # time_diff = time.time() - start_time < 10
-    # while time_diff:
-    #     time_diff = time.time() - start_time < 10
-    # print("Time's up!")
-    # spotify.pause()
+    time_diff = time.time() - start_time < 10
+    while time_diff:
+        time_diff = time.time() - start_time < 10
+    print("Pausing song....")
+    # PAUSE SPOTIFY SONG AFTER 10 SEC OF PLAYING
+    spotify.pause()
     lyrics = ""
     for i in transcript:
         lyrics = lyrics + " " + i["text"]
-    print(lyrics)
-    user_input = "You look so broken when you cry One more and then I'll say goodbye"
-    user_input = lyrics[10:50]
+    say("Player 1 raised their hands first.")
+    # NOW GET USER INPUT
+    user_input = speechRecognizer.startSpeechRecognition(10)
+    print("Time's up!")
+    # print(lyrics)
+    # user_input = "You look so broken when you cry One more and then I'll say goodbye"
+    # user_input = lyrics[10:50]
+    print("User input received:")
     print(user_input)
     potential = []
     for idx, char in enumerate(lyrics):
         if char == ' ':
             lyric_sub = lyrics[idx : idx + len(user_input)]
             ratio = fuzz.ratio(user_input, lyric_sub)
-            if ratio > 80:
+            if ratio > 50:
                 potential.append(lyric_sub)
         if idx > len(lyrics) - len(user_input) - 5:
             break
@@ -97,8 +112,10 @@ def run(spotify):
     if potential:
         for each in potential:
             print(each)
+        say("Correct!")
         print("Correct!")
     else:
+        say("Sorry! That wasn't correct!")
         print("Sorry! That wasn't correct!")
     # playing = True
     # while playing:
@@ -106,7 +123,8 @@ def run(spotify):
 
 
 def ask_for_playlist(spotify):
-    request = input("Which playlist would you like? ")
+    say(f"Which playlist would you like? ")
+    request = speechRecognizer.startSpeechRecognition(4)
     ret = spotify.get_playlist(request)
     # Parse return
     # CASE: Error: specified playlist is empty
@@ -114,10 +132,14 @@ def ask_for_playlist(spotify):
     if ret == -1 or ret == -2:
         if ret == -1:
             print("Error: specified playlist is empty")
+            say("Sorry, that playlist was empty")
         elif ret == -2:
             print("Error: specified playlist has no matches in your playlists")
+            say("Sorry, that playlist doesn't match and playlist in your library")
         # TODO More error handling (like asking again, or if they want a random track instead)
-        ret = input("Do you want to ask again or play a random playlist instead? ")
+        say("Do you want to ask again or play a random playlist instead? ")
+        ret = simplify_string(speechRecognizer.startSpeechRecognition(3))
+        # ret = input("Do you want to ask again or play a random playlist instead? ")
         if ret == "ask again":
             return False, None
         elif ret in ["random", "play random", "play a random song", "whatever"]:
@@ -134,13 +156,19 @@ def ask_for_playlist(spotify):
         random = False
         while ret not in names and not random:
             if toggle_response:
-                ret = simplify_string(input(f"I found {names} as matches. Which one did you mean? "))
+                say(f"I found {names} as matches. Which one did you mean? ")
+                ret = simplify_string(speechRecognizer.startSpeechRecognition(5))
+                # ret = simplify_string(input(f"I found {names} as matches. Which one did you mean? "))
                 toggle_response = not toggle_response
             else:
-                ret = simplify_string(input("Sorry, please try again, or you could tell me to play a random one "))
+                say("Sorry, please try again, or you could tell me to play a random one ")
+                ret =simplify_string(speechRecognizer.startSpeechRecognition(4))
+                # ret = simplify_string(input("Sorry, please try again, or you could tell me to play a random one "))
             if ret in ["random", "play random", "play a random song", "whatever"]:
                 random = True
-        return True, ret
+        if not random:
+            return True, spotify.get_playlist(ret)
+        return True, spotify.get_playlist()
     # CASE: ret is a playlist dict
     elif isinstance(ret, dict):
         return True, ret
@@ -174,9 +202,6 @@ def receive_keys():
         return tuple(l)
 
 def get_transcript_frame(track_name, track_duration, start_time):
-    # video_code = transcript.
-    # video_code = "mRD0-GxqHVo"
-    # video_code = "XbGs_qK2PQA"
     video_id = transcript.get_video_id(track_name, track_duration)
     lyric_arr = transcript.get_transcript(video_id)
     return get_frame(lyric_arr, start_time)

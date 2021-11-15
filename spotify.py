@@ -8,6 +8,11 @@ import json
 import urllib.parse
 import random
 import time
+import subprocess as sp
+import speech
+
+speechRecognizer = speech.Speech(2)
+
 
 API_PLAYER_URL = "https://api.spotify.com/v1/me/player"
 API_PLAYLIST_URL = "https://api.spotify.com/v1/users/pgro68ovwg36mhhjq2jastwv0/playlists"
@@ -155,6 +160,7 @@ curl -H "Authorization: BASE64" -d grant_type=authorization_code -d code=CODE -d
         playlists = []
         potential = []
         if "items" not in response_json or len(response_json["items"]) == 0:
+            say("Sorry, no items found in your playlist library")
             print("Error: No items found in your playlist library")
             exit()
         if PLAYLIST_NAME:
@@ -182,11 +188,29 @@ curl -H "Authorization: BASE64" -d grant_type=authorization_code -d code=CODE -d
                 # Requested playlist found, but there are no tracks in the requested playlist (if requested)
                 elif PLAYLIST_NAME and simplename == PLAYLIST_NAME:
                     return -1
+            # return playlists
             # User requested a playlist, but it was not found
-            return -2
+            return playlists
+            # return -2
         # User did not specify a playlist, select a random one
+        say("Selecting a random playlist...")
         print("Selecting a random playlist...")
-        return random.choice(playlists)
+        for each in response_json["items"]:
+            simplename = simplify_string(each["name"])
+            # Add only playlists that have songs
+            if each["tracks"]["total"] > 0:
+                playlist = {
+                    "id": each["id"],
+                    "name": each["name"],
+                    "tracks": {
+                        "link": each["tracks"]["href"],
+                        "amount": each["tracks"]["total"]
+                    }
+                }
+            playlists.append(playlist)
+        if len(playlists) > 0:
+            return random.choice(playlists)
+        return
 
     def get_tracks(self, playlist_track):
         response_json = self.request_handler("GET", playlist_track["link"], "Tracks", "Tracks error: Check your connection to Spotify")
@@ -205,6 +229,7 @@ curl -H "Authorization: BASE64" -d grant_type=authorization_code -d code=CODE -d
             }
             tracks.append(track)
         if not tracks:
+            say("Sorry, something went wrong, no tracks were found")
             print("Error: Something went wrong. No tracks found")
             exit()
         return tracks
@@ -346,6 +371,9 @@ def simplify_string(string):
         string: a string without punctuation or capitalization
     """
     return re.sub(r'[^a-zA-Z0-9]', '', string).lower()
+
+def say(text: str) -> None:
+    sp.call(['say', text])
 
 if __name__ == "__main__":
     print("Error: Please run from main.py")
