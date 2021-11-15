@@ -3,7 +3,7 @@
   Singify
 </h1>
 <p align="center">
-  Introducing Singify! A party game, play guess the lyrics with your friends! Challenge your friend to who knows songs better. Play random songs from your very own Spotify playlist and duel friends to guess the rest of the lyrics!
+  Introducing Singify, the party game! Challenge your friend to who knows songs better. Play random songs from your very own Spotify playlist and duel friends to see who can finish the lyrics first!
 </p>
 <p align="center">
   <a href="https://devpost.com/software/singify?ref_content=my-projects-tab&ref_feature=my_projects">
