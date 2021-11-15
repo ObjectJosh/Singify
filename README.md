@@ -1,6 +1,5 @@
 <h1 align="center">
   <br>
-  <br>
   Singify
 </h1>
 <p align="center">
