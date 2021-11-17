@@ -74,17 +74,17 @@ We used machine learning to detect human poses for raising hands, which we train
   - *(this is essential, as you can't perform functional features of this app with a Spotify Free Account)*
 - `pip` or `pip3`
 - Homebrew
-  - *required for calling stdbuf*
+  - *required for calling stdbuf (coreutils)*
 
 ### Installing Dependencies
 - youtube-transcript-api
 - youtube-search
 - fuzzywuzzy
 - python-Levenshtein
-- stdbuf
+- coreutils
 ```
 pip3 install youtube-transcript-api youtube-search fuzzywuzzy python-Levenshtein
-brew install stdbuf
+brew install coreutils
 ```
 
 ## Run the App
