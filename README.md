@@ -68,17 +68,23 @@ We used machine learning to detect human poses for raising hands, which we train
 
 # Getting Started
 ### Requirements
+- MacOS
+  - *We use SFSpeechRecognizer, which is limited to MacOS and iOS, but we are in the works of Windows compatability*
 - **Spotify Premium**
   - *(this is essential, as you can't perform functional features of this app with a Spotify Free Account)*
 - `pip` or `pip3`
+- Homebrew
+  - *required for calling stdbuf*
 
 ### Installing Dependencies
 - youtube-transcript-api
 - youtube-search
 - fuzzywuzzy
 - python-Levenshtein
+- stdbuf
 ```
 pip3 install youtube-transcript-api youtube-search fuzzywuzzy python-Levenshtein
+brew install stdbuf
 ```
 
 ## Run the App
