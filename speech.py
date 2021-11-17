@@ -47,22 +47,12 @@ class Speech:
             except TimeoutOfFunction:
                 PROCESS_RUNNING = False
                 process.terminate()
-            print(type(line))
             if line != bytes():
                 timeout_time = stop_if_silent_time
-                print(line)
+                print(str(detected_phrase)[2:-3])
                 detected_phrase = line
-            else:
-                print("????")
-            # print(line)
-            # last_detected_t = time.time()
-        print("out_of_loop")
         process.terminate()
         PROCESS_RUNNING = False
-        # last_detected = process.stdout.read()
-        # print(last_detected)
-        print(detected_phrase)
-        print(str(detected_phrase)[2:-3])
         return str(detected_phrase)[2:-3]
 
 # process.communicate() # close process' stream, wait for it to exit
@@ -73,7 +63,6 @@ class TimeoutOfFunction(Exception):
 
 
 def handler(signum, frame):  # type: ignore
-    print("wow it worked")
     if PROCESS_RUNNING is True:
         raise TimeoutOfFunction()
 

@@ -10,12 +10,10 @@ import random
 import time
 import subprocess as sp
 import speech
-
-speechRecognizer = speech.Speech(2)
-
+from utilities import simplify_string
 
 API_PLAYER_URL = "https://api.spotify.com/v1/me/player"
-API_PLAYLIST_URL = "https://api.spotify.com/v1/users/pgro68ovwg36mhhjq2jastwv0/playlists"
+API_PLAYLIST_URL = "https://api.spotify.com/v1/me/playlists"
 API_TOKEN_URL = "https://accounts.spotify.com/api/token"
 API_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
 REDIRECT_URL = "https://github.com/ObjectJosh"
@@ -247,7 +245,7 @@ curl -H "Authorization: BASE64" -d grant_type=authorization_code -d code=CODE -d
         self.request_handler("PUT", f"{API_PLAYER_URL}/seek?position_ms={milliseconds}", "Seek song", "seek")
         print("Sleeping...", end="")
         time.sleep(2)
-        print("Woke up")
+        print("woke up")
         if track and self.status()["progress"] >= milliseconds:
             print(f"Seeked to {milliseconds / 1000} seconds")
             return True
@@ -362,15 +360,6 @@ def check_error(RESPONSE, errmsg = "", opterrmsg = ""):
         exit()
     # Successfully parsed contents of response into JSON. Send back
     return response_json
-
-def simplify_string(string):
-    """ Removes punctuation and capitalization from given string
-    Args:
-        string(string): string to be simplified
-    Returns:
-        string: a string without punctuation or capitalization
-    """
-    return re.sub(r'[^a-zA-Z0-9]', '', string).lower()
 
 def say(text: str) -> None:
     sp.call(['say', text])
