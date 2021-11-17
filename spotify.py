@@ -1,7 +1,6 @@
 from json.decoder import JSONDecodeError
 import os
 import requests
-import re
 import datetime
 import base64
 import json
@@ -9,7 +8,6 @@ import urllib.parse
 import random
 import time
 import subprocess as sp
-import speech
 from utilities import simplify_string
 
 API_PLAYER_URL = "https://api.spotify.com/v1/me/player"
