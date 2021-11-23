@@ -10,22 +10,19 @@
 <body onload="init()">
     <div id="header">
         <text>Right-Side, Check if hand is raised</text>
-        <!-- <div>
-            <button id="start_button" type="button" onclick="init()">Start</button>
-        </div> -->
     </div>
-    <!-- <div id="blocker"></div> -->
     <div id="right-video">
         <canvas id="right-canvas" width="300" height="600"></canvas>
     </div>
     <div id="label-container"></div>
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
-
     <script type="text/javascript">
 
         // the link to your model provided by Teachable Machine export panel
-        const URL = "https://teachablemachine.withgoogle.com/models/zi53kDWFM/";
+        // const URL = "https://teachablemachine.withgoogle.com/models/zi53kDWFM/";
+        const URL = "https://teachablemachine.withgoogle.com/models/7OhLBixRy/";
         let model, webcam, ctx, labelContainer, maxPredictions;
         let started = false
 
@@ -43,6 +40,8 @@
             const size = 600;
             const flip = false; // whether to flip the webcam
             webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
+            webcam.canvas = document.getElementById("right-canvas")
+            console.log("loading...")
             await webcam.setup(); // request access to the webcam
             await webcam.play();
 
@@ -67,25 +66,7 @@
             window.requestAnimationFrame(loop);
         }
 
-
-        // async function predict() {
-        //     // Prediction #1: run input through posenet
-        //     // estimatePose can take in an image, video or canvas html element
-        //     const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-        //     // Prediction 2: run input through teachable machine classification model
-        //     const prediction = await model.predict(posenetOutput);
-
-        //     for (let i = 0; i < maxPredictions; i++) {
-        //         const classPrediction =
-        //             prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        //         labelContainer.childNodes[i].innerHTML = classPrediction;
-        //         console.log("right: " + labelContainer.childNodes[i].innerHTML)
-        //     }
-
-        //     // finally draw the poses
-        //     drawPose(pose);
-        // }
-        predicts = {};
+        predicts = {"side": "right"};
         loop_count = 0;
 
         async function predict() {
@@ -101,31 +82,10 @@
                 labelContainer.childNodes[i].innerHTML = classPrediction;
                 predicts[prediction[i].className] = prediction[i].probability.toFixed(2);
                 console.log(predicts)
-                // localStorage.setItem('test', JSON.stringify(predicts));
-                // var fs = require('fs');
-                // fs.writeFile("test.json", JSON.stringify(predicts));
-                // console.log("right: " + labelContainer.childNodes[i].innerHTML)
-
-                // finally draw the poses
                 drawPose(pose);
             }
-            if (loop_count%500 == 0) {
-                const textToBLOB = new Blob([JSON.stringify(predicts)], { type: 'text/plain' });
-                const sFileName = 'right.txt';       // The file to save the data.
-    
-                let newLink = document.createElement("a");
-                newLink.download = sFileName;
-    
-                if (window.webkitURL != null) {
-                    newLink.href = window.webkitURL.createObjectURL(textToBLOB);
-                }
-                else {
-                    newLink.href = window.URL.createObjectURL(textToBLOB);
-                    newLink.style.display = "none";
-                    document.body.appendChild(newLink);
-                }
-    
-                newLink.click(); 
+            if (loop_count % 10 == 0) {
+                $.post('http://localhost:8000', predicts)
             }
             loop_count++;
 
