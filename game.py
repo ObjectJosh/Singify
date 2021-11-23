@@ -13,6 +13,7 @@ import transcript
 from spotify import Spotify
 from utilities import say, simplify_string
 import config
+from hand_status import HandRaise
 
 #|##########################################################################|#
 #|                                  SETUP                                   |#
@@ -39,6 +40,7 @@ class Game:
         self.current_track = None
         self.lyrics = ""
         self.track_seek_time = None
+        self.hand_raise = HandRaise()
         # We can use this to see, for example, if a player raised their hand first 3 times in a row,
         # the computer says, "Player [ ] again? Wow, you're quick!"
         self.raised_hand_log = []
@@ -235,13 +237,19 @@ class Game:
         self.spotify.pause()
     
     def detect_hand_raise(self):
-        hand_raised = False
-        while not hand_raised:
-            # DO SOMETHING
-            hand_raised = True
+        print("Detecting hand raise...")
+        val = 'low'
+        while val == 'low':
+            val = self.hand_raise.get_first_hand_raiser()
+            print(val)
         # HARD CODED
-        raised_hand_player = self.player_left
-        self.raised_hand_log.append(self.player_left)
+        print(val)
+        if val == 'left':
+            raised_hand_player = self.player_left
+            self.raised_hand_log.append(self.player_left)
+        else:
+            raised_hand_player = self.player_right
+            self.raised_hand_log.append(self.player_right)
         say(f"{raised_hand_player.name} raised their hand first!")
         self.handle_hand_raise()
 
