@@ -1,3 +1,4 @@
+from subprocess import Popen
 import sys
 import random
 import os
@@ -5,6 +6,7 @@ import time
 import threading
 from fuzzywuzzy import fuzz
 from typing import Optional
+import webbrowser
 
 # File imports
 import speech
@@ -33,6 +35,8 @@ class Game:
     def __init__(self) -> None:
         self.spotify = self.init_spotify_auth()
         self.speechRecognizer = speech.Speech()
+        self.https_process = Popen(['python', 'http_server.py'])
+        webbrowser.open_new_tab("http://localhost:8000/tri-halves.html")
         self.play_introduction()
         self.player_left = self.init_player("left")
         self.player_right = self.init_player("right")
@@ -45,6 +49,9 @@ class Game:
         # the computer says, "Player [ ] again? Wow, you're quick!"
         self.raised_hand_log = []
         self.start()
+    
+    # def start_http_server(self):
+    #     process = Popen(['python', 'http_server.py'])
     
     def play_introduction(self):
         print("Welcome to Singify! Say 'Play' to start, or you can say 'Tell me the rules'")
@@ -336,4 +343,10 @@ class Game:
         return True
 
 if __name__ == '__main__':
-    game = Game()
+    game = None
+    try:
+        game = Game()
+    except KeyboardInterrupt:
+        if game is not None:
+            game.https_process.terminate()
+        raise KeyboardInterrupt()

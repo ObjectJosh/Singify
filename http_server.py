@@ -27,7 +27,7 @@ class S(SimpleHTTPRequestHandler):
         #              str(self.path), str(self.headers), post_data.decode('utf-8'))
         # print(post_data.decode('utf-8'))
         post_data_split = post_data.decode('utf-8').split('&')[0:2]
-        print(post_data_split)
+        # print(post_data_split)
         if post_data_split[0][5] == 'r':
             if self.right_q.is_full():
                 self.right_q.dequeue()
